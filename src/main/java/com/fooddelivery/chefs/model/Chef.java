@@ -1,9 +1,6 @@
 package com.fooddelivery.chefs.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.PrimaryKeyJoinColumn;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -26,4 +23,9 @@ public class Chef extends User {
 
     @Column(name = "is_working", columnDefinition = "boolean default false")
     private Boolean isWorking = false;
+
+    @Transient
+    public String getRole() {
+        return "CHEF";
+    }
 }

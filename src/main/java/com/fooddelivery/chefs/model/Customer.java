@@ -1,9 +1,6 @@
 package com.fooddelivery.chefs.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.PrimaryKeyJoinColumn;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -18,4 +15,9 @@ public class Customer extends User {
 
     @Column(nullable = false)
     private String phone;
+
+    @Transient
+    public String getRole() {
+        return "CUSTOMER";
+    }
 }

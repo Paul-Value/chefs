@@ -1,11 +1,10 @@
 package com.fooddelivery.chefs.model;
 
 import com.fooddelivery.chefs.model.enums.OrderStatus;
-import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import jakarta.persistence.*;
 import lombok.Data;
-import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDef;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
@@ -14,7 +13,6 @@ import java.util.List;
 @Data
 @Entity
 @Table(name = "order")
-@TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,7 +38,7 @@ public class Order {
     @Column(name = "total_price", precision = 10, scale = 2, nullable = false)
     private BigDecimal totalPrice;
 
-    @Type(type = "jsonb") // Указание типа для Hibernate
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "items_json", columnDefinition = "jsonb", nullable = false)
-    private List<OrderItem> itemsJson; // Можно использовать JSONB через Hibernate Types
+    private List<OrderItem> itemsJson;
 }
