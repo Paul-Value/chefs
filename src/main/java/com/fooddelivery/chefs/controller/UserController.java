@@ -1,6 +1,9 @@
 package com.fooddelivery.chefs.controller;
 
+import com.fooddelivery.chefs.model.dto.UserUpdateRequest;
 import com.fooddelivery.chefs.service.UserService;
+
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,11 +15,11 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/personal-data")
-    public ResponseEntity<String> updatePersonalData(
+    public ResponseEntity<String> updateUserData(
             @RequestHeader("X-Device-Id") String deviceId,
-            @RequestBody UserUpdateRequest request
+            @Valid @RequestBody UserUpdateRequest request
     ) {
         userService.updateUserData(deviceId, request);
-        return ResponseEntity.ok("Personal data updated successfully");
+        return ResponseEntity.ok("Данные обновлены");
     }
 }
