@@ -1,6 +1,7 @@
 package com.fooddelivery.chefs.service;
 
 import com.fooddelivery.chefs.model.Customer;
+import com.fooddelivery.chefs.model.dto.UserUpdateRequest;
 import com.fooddelivery.chefs.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

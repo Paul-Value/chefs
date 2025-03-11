@@ -6,6 +6,7 @@ import com.fooddelivery.chefs.model.Order;
 import com.fooddelivery.chefs.model.OrderEvent;
 import com.fooddelivery.chefs.model.dto.OrderCreateRequest;
 import com.fooddelivery.chefs.model.dto.OrderCreateResponse;
+import com.fooddelivery.chefs.model.dto.OrderResponse;
 import com.fooddelivery.chefs.model.enums.OrderStatus;
 import com.fooddelivery.chefs.repository.ChefRepository;
 import com.fooddelivery.chefs.repository.CustomerRepository;
@@ -63,6 +64,29 @@ public class OrderService {
         return orderRepository.findByChefIdAndStatusIn(
                         chef.getChefId(),
                         List.of(OrderStatus.COMPLETED, OrderStatus.CANCELED)
+                ).stream()
+                .map(Order::toResponse)
+                .toList();
+    }
+
+    private Order buildOrder(Customer customer, OrderCreateRequest request, BigDecimal totalPrice) {
+        return Order.builder()
+                .customer(customer)
+                .chef(findChefForOrder(request.getItems()))
+                .itemsJson(convertItemsToJson(request.getItems()))
+                .totalPrice(totalPrice)
+                .status(OrderStatus.CREATED)
+                .comment(request.getComment())
+                .build();
+    }
+
+    public List<OrderResponse> getCurrentOrders(String deviceId) {
+        Customer customer = customerRepository.findByDeviceId(deviceId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+
+        return orderRepository.findByCustomerIdAndStatusIn(
+                        customer.getCustomerId(),
+                        List.of(OrderStatus.CREATED, OrderStatus.IN_COOKING, OrderStatus.DELIVERING)
                 ).stream()
                 .map(Order::toResponse)
                 .toList();

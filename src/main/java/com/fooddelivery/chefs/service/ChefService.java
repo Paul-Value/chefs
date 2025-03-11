@@ -30,7 +30,7 @@ public class ChefService {
 
     private ChefDetailsResponse convertToDetailsResponse(Chef chef) {
         return ChefDetailsResponse.builder()
-                .chefId(chef.getChefId())
+                .chefId(chef.getUserId())
                 .photoUrl(chef.getPhotoUrl())
                 .description(chef.getDescription())
                 .phone(chef.getPhone())

@@ -3,6 +3,8 @@ package com.fooddelivery.chefs.controller;
 import com.fooddelivery.chefs.model.Order;
 import com.fooddelivery.chefs.model.OrderEvent;
 import com.fooddelivery.chefs.model.dto.OrderPriceResponse;
+import com.fooddelivery.chefs.model.dto.OrderRequest;
+import com.fooddelivery.chefs.model.dto.OrderResponse;
 import com.fooddelivery.chefs.model.dto.PriceCalculationRequest;
 import com.fooddelivery.chefs.service.OrderEventPublisher;
 import com.fooddelivery.chefs.service.OrderService;
@@ -12,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -36,18 +39,12 @@ public class OrderController {
         return ResponseEntity.ok(orders);
     }
 
-    @PostMapping("/orders")
-    public ResponseEntity<OrderResponse> createOrder(@RequestBody OrderRequest request) {
-        Order order = orderService.createOrder(request);
-
-        // Отправка события
-        OrderEvent event = new OrderEvent();
-        event.setOrderId(order.getOrderId());
-        event.setChefId(order.getChef().getChefId());
-        event.setCustomerName(order.getCustomer().getName());
-        event.setCreatedAt(order.getCreatedAt().toInstant());
-        eventPublisher.publish(event);
-
-        return ResponseEntity.ok(order.toResponse());
+    @PostMapping
+    public ResponseEntity<OrderResponse> createOrder(
+            @RequestHeader("X-Device-Id") String deviceId,
+            @Valid @RequestBody OrderRequest request
+    ) {
+        OrderResponse response = orderService.createOrder(deviceId, request);
+        return ResponseEntity.ok(response);
     }
 }

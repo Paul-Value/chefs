@@ -36,7 +36,7 @@ public class ChefController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
 
         return ResponseEntity.ok(ChefValidationResponse.builder()
-                .chefId(chef.getChefId())
+                .chefId(chef.getUserId())
                 .message("Код действителен")
                 .build());
     }

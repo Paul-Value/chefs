@@ -2,15 +2,19 @@ package com.fooddelivery.chefs.controller;
 
 import com.fooddelivery.chefs.model.Order;
 import com.fooddelivery.chefs.model.OrderEvent;
+import com.fooddelivery.chefs.model.dto.OrderResponse;
 import com.fooddelivery.chefs.model.dto.OrderStatusUpdateRequest;
 import com.fooddelivery.chefs.service.OrderEventPublisher;
 import com.fooddelivery.chefs.service.OrderService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/chefs/orders")
@@ -30,10 +34,11 @@ public class ChefOrderController {
     @PostMapping("/{orderId}/status")
     public ResponseEntity<OrderResponse> updateOrderStatus(
             @PathVariable Long orderId,
-            @RequestBody OrderStatusUpdateRequest request
+            @RequestHeader("X-Access-Code") String accessCode,
+            @Valid @RequestBody OrderStatusUpdateRequest request
     ) {
-        Order order = orderService.updateStatus(orderId, request.getStatus());
-        return ResponseEntity.ok(order.toResponse());
+        OrderResponse response = orderService.updateOrderStatus(orderId, accessCode, request.getStatus());
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/history")
