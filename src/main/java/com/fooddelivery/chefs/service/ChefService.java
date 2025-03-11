@@ -3,8 +3,10 @@ package com.fooddelivery.chefs.service;
 import com.fooddelivery.chefs.model.Address;
 import com.fooddelivery.chefs.model.Chef;
 import com.fooddelivery.chefs.model.Customer;
+import com.fooddelivery.chefs.model.Food;
 import com.fooddelivery.chefs.model.dto.ChefDetailsResponse;
 import com.fooddelivery.chefs.model.dto.ChefResponse;
+import com.fooddelivery.chefs.model.dto.FoodDetailsResponse;
 import com.fooddelivery.chefs.repository.ChefRepository;
 import com.fooddelivery.chefs.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,30 @@ public class ChefService {
         Chef chef = chefRepository.findByIdWithFoods(chefId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         return convertToDetailsResponse(chef);
+    }
+
+    private ChefDetailsResponse convertToDetailsResponse(Chef chef) {
+        return ChefDetailsResponse.builder()
+                .chefId(chef.getChefId())
+                .photoUrl(chef.getPhotoUrl())
+                .description(chef.getDescription())
+                .phone(chef.getPhone())
+                .isWorking(chef.getIsWorking())
+                .foods(chef.getFoods().stream()
+                        .map(this::convertToFoodDetails)
+                        .toList())
+                .build();
+    }
+
+    private FoodDetailsResponse convertToFoodDetails(Food food) {
+        return FoodDetailsResponse.builder()
+                .foodId(food.getFoodId())
+                .name(food.getName())
+                .description(food.getDescription())
+                .ingredients(food.getIngredients())
+                .price(food.getPrice())
+                .photoUrl(food.getPhotoUrl())
+                .build();
     }
 
     public List<ChefResponse> getNearbyChefs(String deviceId, double radiusKm) {
