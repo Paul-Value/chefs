@@ -3,6 +3,7 @@ package com.fooddelivery.chefs.service;
 import com.fooddelivery.chefs.model.Address;
 import com.fooddelivery.chefs.model.Chef;
 import com.fooddelivery.chefs.model.Customer;
+import com.fooddelivery.chefs.model.dto.ChefDetailsResponse;
 import com.fooddelivery.chefs.model.dto.ChefResponse;
 import com.fooddelivery.chefs.repository.ChefRepository;
 import com.fooddelivery.chefs.repository.CustomerRepository;
@@ -18,6 +19,12 @@ import java.util.List;
 public class ChefService {
     private final CustomerRepository customerRepository;
     private final ChefRepository chefRepository;
+
+    public ChefDetailsResponse getChefDetails(Long chefId) {
+        Chef chef = chefRepository.findByIdWithFoods(chefId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        return convertToDetailsResponse(chef);
+    }
 
     public List<ChefResponse> getNearbyChefs(String deviceId, double radiusKm) {
         Customer customer = customerRepository.findByDeviceId(deviceId)
@@ -54,8 +61,20 @@ public class ChefService {
     }
 
     private double calculateDistance(Address customerAddr, Address chefAddr) {
-        // Формула гаверсинусов
-        return ...;
+        double lat1 = Math.toRadians(customerAddr.getLatitude().doubleValue());
+        double lon1 = Math.toRadians(customerAddr.getLongitude().doubleValue());
+        double lat2 = Math.toRadians(chefAddr.getLatitude().doubleValue());
+        double lon2 = Math.toRadians(chefAddr.getLongitude().doubleValue());
+
+        double dLat = lat2 - lat1;
+        double dLon = lon2 - lon1;
+
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(lat1) * Math.cos(lat2) *
+                        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+        return 6371 * c; // Радиус Земли в км
     }
 }
 

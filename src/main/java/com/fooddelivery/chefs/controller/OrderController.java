@@ -3,6 +3,7 @@ package com.fooddelivery.chefs.controller;
 import com.fooddelivery.chefs.model.Order;
 import com.fooddelivery.chefs.model.OrderEvent;
 import com.fooddelivery.chefs.service.OrderEventPublisher;
+import com.fooddelivery.chefs.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
