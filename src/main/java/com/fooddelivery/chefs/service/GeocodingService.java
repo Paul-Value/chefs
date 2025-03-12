@@ -62,7 +62,8 @@ public class GeocodingService {
                     .map(item -> new GeocodingResponse(
                             item.getDisplayName(),
                             new BigDecimal(item.getLat()),
-                            new BigDecimal(item.getLon())
+                            new BigDecimal(item.getLon()),
+                            item.getOsmId()
                     ))
                     .toList();
 
@@ -81,6 +82,8 @@ public class GeocodingService {
         private String displayName;
         private String lat;
         private String lon;
+        @JsonProperty("osm_id")
+        private String osmId;
     }
 
     // Интерцептор с аннотациями @NonNull

@@ -1,5 +1,6 @@
 package com.fooddelivery.chefs.model.dto;
 
+import com.fooddelivery.chefs.model.Ingredient;
 import lombok.Builder;
 import lombok.Data;
 
@@ -12,7 +13,7 @@ public class FoodResponse {
     private Long foodId;
     private String name;
     private String description;
-    private List<String> ingredients;
+    private List<Ingredient> ingredients;
     private BigDecimal price;
     private String photoUrl;
 }

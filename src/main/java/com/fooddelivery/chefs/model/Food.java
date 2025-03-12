@@ -1,5 +1,6 @@
 package com.fooddelivery.chefs.model;
 
+import com.fooddelivery.chefs.model.dto.FoodResponse;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -36,4 +37,14 @@ public class Food {
             inverseJoinColumns = @JoinColumn(name = "ingredient_id")
     )
     private List<Ingredient> ingredients;
+
+    private FoodResponse convertFoodToResponse(Food food) {
+        return FoodResponse.builder()
+                .foodId(food.getFoodId())
+                .name(food.getName())
+                .description(food.getDescription())
+                .price(food.getPrice())
+                .photoUrl(food.getPhotoUrl())
+                .build();
+    }
 }

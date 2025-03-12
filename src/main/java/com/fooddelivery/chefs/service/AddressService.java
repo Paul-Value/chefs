@@ -3,7 +3,6 @@ package com.fooddelivery.chefs.service;
 import com.fooddelivery.chefs.model.Address;
 import com.fooddelivery.chefs.model.Customer;
 import com.fooddelivery.chefs.model.dto.AddressSaveRequest;
-import com.fooddelivery.chefs.model.dto.AddressSearchResult;
 import com.fooddelivery.chefs.model.dto.GeocodingResponse;
 import com.fooddelivery.chefs.repository.AddressRepository;
 import com.fooddelivery.chefs.repository.CustomerRepository;
@@ -32,11 +31,12 @@ public class AddressService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Неверный place_id");
         }
 
+        GeocodingResponse geocodingData = cachedResults.get(0);
         Address address = Address.builder()
                 .customer(customer)
-                .formattedAddress(cachedResults.get(0).getFormattedAddress())
-                .latitude(cachedResults.get(0).getLatitude())
-                .longitude(cachedResults.get(0).getLongitude())
+                .formattedAddress(geocodingData.getFormattedAddress())
+                .latitude(geocodingData.getLatitude())
+                .longitude(geocodingData.getLongitude())
                 .entrance(request.getEntrance())
                 .floor(request.getFloor())
                 .apartment(request.getApartment())

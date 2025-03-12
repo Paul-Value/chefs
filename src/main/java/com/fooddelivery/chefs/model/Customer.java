@@ -16,6 +16,11 @@ public class Customer extends User {
     @Column(nullable = false)
     private String phone;
 
+    @OneToOne
+    @JoinColumn(name = "address_id")
+    private Address address;
+
+
     @Transient
     public String getRole() {
         return "CUSTOMER";

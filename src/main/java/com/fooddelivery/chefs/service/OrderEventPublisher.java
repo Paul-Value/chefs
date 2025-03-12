@@ -10,10 +10,10 @@ public class OrderEventPublisher {
     // Sinks.Many для рассылки событий
     private final Sinks.Many<OrderEvent> sink = Sinks.many().multicast().onBackpressureBuffer();
 
-    /*public void publishStatusUpdate(Long orderId, OrderStatus newStatus) {
-        OrderEvent event = new OrderEvent(orderId, newStatus);
+    public void publishStatusUpdate(Long chefId, OrderEvent event) {
+        event.setChefId(chefId);
         sink.tryEmitNext(event);
-    }*/
+    }
 
     public void publish(OrderEvent event) {
         sink.tryEmitNext(event);

@@ -7,6 +7,7 @@ import com.fooddelivery.chefs.model.Food;
 import com.fooddelivery.chefs.model.dto.ChefDetailsResponse;
 import com.fooddelivery.chefs.model.dto.ChefResponse;
 import com.fooddelivery.chefs.model.dto.FoodDetailsResponse;
+import com.fooddelivery.chefs.model.dto.FoodResponse;
 import com.fooddelivery.chefs.repository.ChefRepository;
 import com.fooddelivery.chefs.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
@@ -41,8 +42,8 @@ public class ChefService {
                 .build();
     }
 
-    private FoodDetailsResponse convertToFoodDetails(Food food) {
-        return FoodDetailsResponse.builder()
+    private FoodResponse convertToFoodDetails(Food food) {
+        return FoodResponse.builder()
                 .foodId(food.getFoodId())
                 .name(food.getName())
                 .description(food.getDescription())
@@ -64,7 +65,7 @@ public class ChefService {
 
     private ChefResponse convertToResponse(Chef chef) {
         return ChefResponse.builder()
-                .chefId(chef.getChefId())
+                .chefId(chef.getUserId())
                 .photoUrl(chef.getPhotoUrl())
                 .description(chef.getDescription())
                 .phone(chef.getPhone())
@@ -75,6 +76,16 @@ public class ChefService {
                 .build();
     }
 
+    private FoodResponse convertFoodToResponse(Food food) {
+        return FoodResponse.builder()
+                .foodId(food.getFoodId())
+                .name(food.getName())
+                .description(food.getDescription())
+                .price(food.getPrice())
+                .photoUrl(food.getPhotoUrl())
+                .build();
+    }
+
     public List<ChefResponse> findNearbyChefs(String deviceId, double radiusKm) {
         Customer customer = customerRepository.findByDeviceId(deviceId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
@@ -82,7 +93,7 @@ public class ChefService {
         List<Chef> chefs = chefRepository.findByIsWorkingTrue();
         return chefs.stream()
                 .filter(chef -> calculateDistance(customer.getAddress(), chef.getAddress()) <= radiusKm)
-                .map(Chef::toResponse)
+                .map(this::convertToResponse)
                 .toList();
     }
 

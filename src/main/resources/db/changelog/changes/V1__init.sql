@@ -29,8 +29,13 @@ CREATE TABLE chef (
                       description TEXT,
                       phone VARCHAR(20) NOT NULL,
                       access_code VARCHAR(100) UNIQUE NOT NULL,
-                      is_working BOOLEAN DEFAULT false
+                      is_working BOOLEAN DEFAULT false,
+                      address_id BIGINT
 );
+
+ALTER TABLE chef
+    ADD CONSTRAINT fk_chef_address
+        FOREIGN KEY (address_id) REFERENCES address(address_id);
 
 -- Таблица заказчиков (customer)
 CREATE TABLE customer (

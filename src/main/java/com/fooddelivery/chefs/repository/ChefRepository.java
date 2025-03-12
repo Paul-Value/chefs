@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ChefRepository extends JpaRepository<Chef, Long> {
+    List<Chef> findByIsWorkingTrue();
+
     Optional<Chef> findByAccessCode(String accessCode);
 
     @Query("SELECT c FROM Chef c LEFT JOIN FETCH c.foods WHERE c.chefId = :chefId")

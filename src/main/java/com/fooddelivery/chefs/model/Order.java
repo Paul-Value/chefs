@@ -1,5 +1,7 @@
 package com.fooddelivery.chefs.model;
 
+import com.fooddelivery.chefs.model.dto.OrderItemResponse;
+import com.fooddelivery.chefs.model.dto.OrderResponse;
 import com.fooddelivery.chefs.model.enums.OrderStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -47,4 +49,23 @@ public class Order {
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "items_json", columnDefinition = "jsonb", nullable = false)
     private List<OrderItem> itemsJson;
+
+    public OrderResponse toResponse() {
+        return OrderResponse.builder()
+                .orderId(this.orderId)
+                .chefName(this.chef.getName())
+                .chefPhone(this.chef.getPhone())
+                .status(this.status)
+                .createdAt(this.createdAt)
+                .totalPrice(this.totalPrice)
+                .items(this.convertItemsToResponse())
+                .build();
+    }
+
+    @Column(name = "reject_comment")
+    private String rejectComment;
+
+    private List<OrderItemResponse> convertItemsToResponse() {
+        // Логика преобразования items_json в List<OrderItemResponse>
+    }
 }

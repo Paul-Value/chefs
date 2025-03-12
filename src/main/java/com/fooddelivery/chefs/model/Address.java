@@ -31,4 +31,8 @@ public class Address {
     private String entrance;
     private String floor;
     private String apartment;
+
+    @ManyToOne
+    @JoinColumn(name = "customer_id")
+    private Customer customer; // Связь с Customer
 }

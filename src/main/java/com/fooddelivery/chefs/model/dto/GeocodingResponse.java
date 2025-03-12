@@ -8,7 +8,8 @@ import java.math.BigDecimal;
 @Data
 @AllArgsConstructor
 public class GeocodingResponse {
-    private String displayName;
+    private String formattedAddress;
     private BigDecimal latitude;
     private BigDecimal longitude;
+    private String placeId;
 }

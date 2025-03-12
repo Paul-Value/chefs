@@ -1,12 +1,9 @@
 package com.fooddelivery.chefs.service;
 
-import com.fooddelivery.chefs.model.Chef;
-import com.fooddelivery.chefs.model.Customer;
-import com.fooddelivery.chefs.model.Order;
-import com.fooddelivery.chefs.model.OrderEvent;
-import com.fooddelivery.chefs.model.dto.OrderCreateRequest;
-import com.fooddelivery.chefs.model.dto.OrderCreateResponse;
-import com.fooddelivery.chefs.model.dto.OrderResponse;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fooddelivery.chefs.model.*;
+import com.fooddelivery.chefs.model.dto.*;
 import com.fooddelivery.chefs.model.enums.OrderStatus;
 import com.fooddelivery.chefs.repository.ChefRepository;
 import com.fooddelivery.chefs.repository.CustomerRepository;
@@ -19,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.List;
 
 @Service
@@ -35,7 +33,7 @@ public class OrderService {
         Customer customer = customerRepository.findByDeviceId(deviceId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
 
-        if (customer.getAddress() == null) {
+        if (customer.getAddressId() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Адрес не указан");
         }
 
@@ -43,7 +41,7 @@ public class OrderService {
         Order order = buildOrder(customer, request, totalPrice);
         orderRepository.save(order);
 
-        eventPublisher.publish(new OrderEvent(order.getOrderId(), order.getChef().getChefId(), customer.getName()));
+        eventPublisher.publish(new OrderEvent(order.getOrderId(), order.getChef().getUserId(), customer.getName(), Instant.now()));
         return OrderCreateResponse.builder()
                 .orderId(order.getOrderId())
                 .status(order.getStatus())
@@ -62,7 +60,7 @@ public class OrderService {
         Chef chef = chefRepository.findByAccessCode(accessCode)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
         return orderRepository.findByChefIdAndStatusIn(
-                        chef.getChefId(),
+                        chef.getUserId(),
                         List.of(OrderStatus.COMPLETED, OrderStatus.CANCELED)
                 ).stream()
                 .map(Order::toResponse)
@@ -80,15 +78,82 @@ public class OrderService {
                 .build();
     }
 
+    private String convertItemsToJson(List<OrderItemRequest> items) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.writeValueAsString(items);
+        } catch (JsonProcessingException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Ошибка преобразования данных");
+        }
+    }
+
+    private Chef findChefForOrder(List<OrderItemRequest> items) {
+        // Предполагаем, что все блюда в заказе принадлежат одному повару
+        Long chefId = items.stream()
+                .map(item -> foodRepository.findById(item.getFoodId())
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND))
+                        .map(Food::getChefId)
+                        .findFirst()
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
+
+        return chefRepository.findById(chefId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Повар не найден"));
+    }
+
     public List<OrderResponse> getCurrentOrders(String deviceId) {
         Customer customer = customerRepository.findByDeviceId(deviceId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
 
-        return orderRepository.findByCustomerIdAndStatusIn(
-                        customer.getCustomerId(),
+        return orderRepository.findByCustomerAndStatusIn(
+                        customer,
                         List.of(OrderStatus.CREATED, OrderStatus.IN_COOKING, OrderStatus.DELIVERING)
                 ).stream()
                 .map(Order::toResponse)
                 .toList();
     }
+
+    public OrderResponse handleOrderResponse(Long orderId, String accessCode, String action, String rejectComment) {
+        Chef chef = chefRepository.findByAccessCode(accessCode)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        if ("accept".equals(action)) {
+            order.setStatus(OrderStatus.IN_COOKING);
+            order.setChef(chef);
+        } else if ("reject".equals(action)) {
+            order.setStatus(OrderStatus.CANCELED);
+            order.setRejectComment(rejectComment);
+        }
+
+        orderRepository.save(order);
+        return convertToOrderResponse(order);
+    }
+
+    private OrderResponse convertToOrderResponse(Order order) {
+        return OrderResponse.builder()
+                .orderId(order.getOrderId())
+                .chefName(order.getChef().getName())
+                .chefPhone(order.getChef().getPhone())
+                .status(order.getStatus())
+                .createdAt(order.getCreatedAt())
+                .totalPrice(order.getTotalPrice())
+                .items(order.getItemsJson().stream()
+                        .map(item -> new OrderItemResponse(item.getFoodId(), item.getQuantity()))
+                        .toList())
+                .build();
+    }
+
+
+    private BigDecimal calculateTotalPrice(List<OrderItemRequest> items) {
+        return items.stream()
+                .map(item -> {
+                    Food food = foodRepository.findById(item.getFoodId())
+                            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Блюдо не найдено"));
+                    return food.getPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
+                })
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
 }

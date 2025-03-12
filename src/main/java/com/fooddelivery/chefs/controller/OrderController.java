@@ -1,11 +1,6 @@
 package com.fooddelivery.chefs.controller;
 
-import com.fooddelivery.chefs.model.Order;
-import com.fooddelivery.chefs.model.OrderEvent;
-import com.fooddelivery.chefs.model.dto.OrderPriceResponse;
-import com.fooddelivery.chefs.model.dto.OrderRequest;
-import com.fooddelivery.chefs.model.dto.OrderResponse;
-import com.fooddelivery.chefs.model.dto.PriceCalculationRequest;
+import com.fooddelivery.chefs.model.dto.*;
 import com.fooddelivery.chefs.service.OrderEventPublisher;
 import com.fooddelivery.chefs.service.OrderService;
 import jakarta.validation.Valid;
@@ -17,19 +12,20 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
+@RequestMapping("/orders")
 @RequiredArgsConstructor
 public class OrderController {
     private final OrderService orderService;
     private final OrderEventPublisher eventPublisher;
 
-    @PostMapping("/price")
+    /*@PostMapping("/price")
     public ResponseEntity<OrderPriceResponse> calculatePrice(
             @RequestHeader("X-Device-Id") String deviceId,
             @Valid @RequestBody PriceCalculationRequest request
     ) {
         BigDecimal totalPrice = orderService.calculateTotalPrice(request.getItems());
         return ResponseEntity.ok(OrderPriceResponse.builder().totalPrice(totalPrice).build());
-    }
+    } */
 
     @GetMapping("/current")
     public ResponseEntity<List<OrderResponse>> getCurrentOrders(
@@ -40,11 +36,11 @@ public class OrderController {
     }
 
     @PostMapping
-    public ResponseEntity<OrderResponse> createOrder(
+    public ResponseEntity<OrderCreateResponse> createOrder(
             @RequestHeader("X-Device-Id") String deviceId,
-            @Valid @RequestBody OrderRequest request
+            @Valid @RequestBody OrderCreateRequest request
     ) {
-        OrderResponse response = orderService.createOrder(deviceId, request);
+        OrderCreateResponse response = orderService.createOrder(deviceId, request);
         return ResponseEntity.ok(response);
     }
 }
