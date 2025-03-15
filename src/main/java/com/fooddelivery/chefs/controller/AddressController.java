@@ -2,7 +2,6 @@ package com.fooddelivery.chefs.controller;
 
 import com.fooddelivery.chefs.model.dto.AddressSaveRequest;
 import com.fooddelivery.chefs.model.dto.AddressSearchRequest;
-import com.fooddelivery.chefs.model.dto.AddressSearchResult;
 import com.fooddelivery.chefs.model.dto.GeocodingResponse;
 import com.fooddelivery.chefs.service.AddressService;
 import com.fooddelivery.chefs.service.GeocodingService;

@@ -1,5 +1,8 @@
 package com.fooddelivery.chefs.model;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fooddelivery.chefs.model.dto.OrderItemResponse;
 import com.fooddelivery.chefs.model.dto.OrderResponse;
 import com.fooddelivery.chefs.model.enums.OrderStatus;
@@ -48,7 +51,7 @@ public class Order {
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "items_json", columnDefinition = "jsonb", nullable = false)
-    private List<OrderItem> itemsJson;
+    private String itemsJson;
 
     public OrderResponse toResponse() {
         return OrderResponse.builder()
@@ -58,14 +61,19 @@ public class Order {
                 .status(this.status)
                 .createdAt(this.createdAt)
                 .totalPrice(this.totalPrice)
-                .items(this.convertItemsToResponse())
+                .items(this.convertItemsToResponse(this.itemsJson))
                 .build();
     }
 
     @Column(name = "reject_comment")
     private String rejectComment;
 
-    private List<OrderItemResponse> convertItemsToResponse() {
-        // Логика преобразования items_json в List<OrderItemResponse>
+    public List<OrderItemResponse> convertItemsToResponse(String itemsJson) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.readValue(itemsJson, new TypeReference<List<OrderItemResponse>>() {});
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Ошибка преобразования JSON", e);
+        }
     }
 }

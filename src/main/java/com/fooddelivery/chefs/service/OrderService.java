@@ -49,18 +49,27 @@ public class OrderService {
                 .build();
     }
 
-    public Order updateStatus(Long orderId, OrderStatus status) {
+    public OrderResponse updateOrderStatus(Long orderId, String accessCode, OrderStatus status) {
+        Chef chef = chefRepository.findByAccessCode(accessCode)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        if (!order.getChef().getUserId().equals(chef.getUserId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Заказ не принадлежит повару");
+        }
+
         order.setStatus(status);
-        return orderRepository.save(order);
+        orderRepository.save(order);
+        return convertToOrderResponse(order);
     }
 
     public List<OrderResponse> getChefOrderHistory(String accessCode) {
         Chef chef = chefRepository.findByAccessCode(accessCode)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
-        return orderRepository.findByChefIdAndStatusIn(
-                        chef.getUserId(),
+        return orderRepository.findByChefAndStatusIn(
+                        chef,
                         List.of(OrderStatus.COMPLETED, OrderStatus.CANCELED)
                 ).stream()
                 .map(Order::toResponse)
@@ -91,10 +100,12 @@ public class OrderService {
         // Предполагаем, что все блюда в заказе принадлежат одному повару
         Long chefId = items.stream()
                 .map(item -> foodRepository.findById(item.getFoodId())
-                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND))
-                        .map(Food::getChefId)
-                        .findFirst()
-                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Блюдо не найдено")))
+                .map(Food::getChef)
+                .map(Chef::getUserId)
+                .findFirst()
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Не удалось определить повара"));
+
 
         return chefRepository.findById(chefId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Повар не найден"));
@@ -139,9 +150,7 @@ public class OrderService {
                 .status(order.getStatus())
                 .createdAt(order.getCreatedAt())
                 .totalPrice(order.getTotalPrice())
-                .items(order.getItemsJson().stream()
-                        .map(item -> new OrderItemResponse(item.getFoodId(), item.getQuantity()))
-                        .toList())
+                .items(order.convertItemsToResponse(order.getItemsJson()))
                 .build();
     }
 
