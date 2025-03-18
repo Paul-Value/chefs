@@ -155,7 +155,7 @@ public class OrderService {
     }
 
 
-    private BigDecimal calculateTotalPrice(List<OrderItemRequest> items) {
+    public BigDecimal calculateTotalPrice(List<OrderItemRequest> items) {
         return items.stream()
                 .map(item -> {
                     Food food = foodRepository.findById(item.getFoodId())

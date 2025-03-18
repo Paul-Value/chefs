@@ -18,14 +18,14 @@ public class OrderController {
     private final OrderService orderService;
     private final OrderEventPublisher eventPublisher;
 
-    /*@PostMapping("/price")
+    @PostMapping("/price")
     public ResponseEntity<OrderPriceResponse> calculatePrice(
             @RequestHeader("X-Device-Id") String deviceId,
-            @Valid @RequestBody PriceCalculationRequest request
+            @Valid @RequestBody OrderPriceRequest request
     ) {
         BigDecimal totalPrice = orderService.calculateTotalPrice(request.getItems());
         return ResponseEntity.ok(OrderPriceResponse.builder().totalPrice(totalPrice).build());
-    } */
+    }
 
     @GetMapping("/current")
     public ResponseEntity<List<OrderResponse>> getCurrentOrders(

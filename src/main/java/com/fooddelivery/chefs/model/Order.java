@@ -37,6 +37,10 @@ public class Order {
     @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;
 
+    @Column(name = "reject_comment")
+    private String rejectComment;
+
+    @Column(name = "comment")
     private String comment;
 
     @Column(name = "created_at", nullable = false)
@@ -64,9 +68,6 @@ public class Order {
                 .items(this.convertItemsToResponse(this.itemsJson))
                 .build();
     }
-
-    @Column(name = "reject_comment")
-    private String rejectComment;
 
     public List<OrderItemResponse> convertItemsToResponse(String itemsJson) {
         try {

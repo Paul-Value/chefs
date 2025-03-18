@@ -2,6 +2,7 @@ package com.fooddelivery.chefs.controller;
 
 import com.fooddelivery.chefs.model.Chef;
 import com.fooddelivery.chefs.model.OrderEvent;
+import com.fooddelivery.chefs.model.dto.ChefDetailsResponse;
 import com.fooddelivery.chefs.model.dto.ChefResponse;
 import com.fooddelivery.chefs.model.dto.ChefValidationResponse;
 import com.fooddelivery.chefs.repository.ChefRepository;
@@ -27,6 +28,12 @@ public class ChefController {
     private final OrderEventPublisher eventPublisher;
     private final ChefService chefService;
     private final ChefRepository chefRepository;
+
+    @GetMapping("/{chefId}")
+    public ResponseEntity<ChefDetailsResponse> getChefDetails(@PathVariable Long chefId) {
+        ChefDetailsResponse response = chefService.getChefDetails(chefId);
+        return ResponseEntity.ok(response);
+    }
 
     @PostMapping("/validate-access")
     public ResponseEntity<ChefValidationResponse> validateAccess(

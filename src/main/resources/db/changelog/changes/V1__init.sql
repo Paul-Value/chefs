@@ -72,6 +72,7 @@ CREATE TABLE "order" (
                          order_id BIGSERIAL PRIMARY KEY,
                          chef_id BIGINT NOT NULL REFERENCES chef(chef_id),
                          customer_id BIGINT NOT NULL REFERENCES customer(customer_id),
+                         reject_comment TEXT,
                          comment TEXT,
                          created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
                          status VARCHAR(20) NOT NULL CHECK (

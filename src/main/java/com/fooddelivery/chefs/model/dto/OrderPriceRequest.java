@@ -6,7 +6,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class PriceCalculationRequest {
+public class OrderPriceRequest {
     @NotEmpty(message = "Список блюд не может быть пустым")
     private List<OrderItemRequest> items;
 }
